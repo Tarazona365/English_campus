@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Interview Questions - Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #f8fafc; /* slate-50 */
+        }
+        
+        /* Custom Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        /* Matching Game Styles */
+        .match-btn {
+            transition: all 0.2s;
+        }
+        .match-btn:hover:not(.matched) {
+            transform: scale(1.02);
+            border-color: #38bdf8; /* sky-400 */
+        }
+        .selected {
+            background-color: #1e293b !important; /* slate-800 */
+            border-color: #38bdf8 !important; /* sky-400 */
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+        .matched {
+            background-color: #064e3b !important; /* emerald-900 */
+            border-color: #10b981 !important; /* emerald-500 */
+            color: #a7f3d0 !important; /* emerald-200 */
+            opacity: 0.7;
+            cursor: default;
+            transform: scale(0.98);
+        }
+        .wrong {
+            animation: shake 0.4s;
+            border-color: #ef4444 !important; /* red-500 */
+            background-color: #7f1d1d !important; /* red-900 */
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+
+        /* Flashcard Styles */
+        .flashcard-container {
+            perspective: 1000px;
+        }
+        .flashcard {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            backface-visibility: hidden;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto space-y-12">
+        
+        <!-- Header -->
+        <header class="text-center bg-slate-800 p-8 rounded-3xl shadow-2xl border-b-4 border-sky-500 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sky-400 via-indigo-500 to-purple-500"></div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400 mb-2 tracking-tight">
+                GO FOR IT! 🚀
+            </h1>
+            <h2 class="text-2xl font-semibold text-slate-300">Basic Interview Questions</h2>
+            <p class="text-slate-400 mt-4">Practice your English speaking and comprehension skills.</p>
+        </header>
+
+        <!-- SECTION 1: Interview Roulette (Speaking Practice) -->
+        <section class="bg-slate-800 p-6 md:p-10 rounded-3xl shadow-xl border border-slate-700">
+            <div class="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
+                <span class="text-3xl">🎙️</span>
+                <h3 class="text-2xl font-bold text-sky-400">1. Interview Simulator</h3>
+            </div>
+            <p class="text-slate-300 mb-8 text-lg">Click the button to get a random question. Read it out loud and practice your answer!</p>
+            
+            <div class="bg-slate-900 p-8 md:p-12 rounded-2xl text-center min-h-[250px] flex flex-col items-center justify-center border-2 border-dashed border-slate-600 relative">
+                
+                <div id="random-question-display" class="text-2xl md:text-4xl font-bold text-white mb-8 min-h-[80px] flex items-center text-center leading-tight">
+                    Are you ready?
+                </div>
+                
+                <button onclick="generateRandomQuestion()" class="bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold py-4 px-10 rounded-full text-xl shadow-[0_0_15px_rgba(56,189,248,0.5)] transform transition hover:scale-105">
+                    Ask Me a Question!
+                </button>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Matching Game (Comprehension) -->
+        <section class="bg-slate-800 p-6 md:p-10 rounded-3xl shadow-xl border border-slate-700">
+            <div class="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
+                <span class="text-3xl">🧩</span>
+                <h3 class="text-2xl font-bold text-indigo-400">2. Match the Answer</h3>
+            </div>
+            <p class="text-slate-300 mb-8 text-lg">Select a question from the left, then select the correct logical answer on the right.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Questions Column -->
+                <div class="space-y-4" id="questions-col">
+                    <h4 class="text-center font-bold text-slate-400 mb-4 uppercase tracking-widest">Questions</h4>
+                    <!-- Generated by JS -->
+                </div>
+                
+                <!-- Answers Column -->
+                <div class="space-y-4" id="answers-col">
+                    <h4 class="text-center font-bold text-slate-400 mb-4 uppercase tracking-widest">Answers</h4>
+                    <!-- Generated by JS -->
+                </div>
+            </div>
+
+            <div id="matching-feedback" class="hidden mt-8 p-4 rounded-xl font-bold text-center text-xl bg-emerald-900 border border-emerald-500 text-emerald-300">
+                🎉 Perfect! You matched all the questions correctly!
+            </div>
+        </section>
+
+        <!-- SECTION 3: Flashcards (Study Mode) -->
+        <section class="bg-slate-800 p-6 md:p-10 rounded-3xl shadow-xl border border-slate-700">
+            <div class="flex items-center gap-3 mb-6 border-b border-slate-700 pb-4">
+                <span class="text-3xl">📇</span>
+                <h3 class="text-2xl font-bold text-purple-400">3. Study Flashcards</h3>
+            </div>
+            <p class="text-slate-300 mb-6 text-lg">Click the card to flip it and see a tip on how to answer.</p>
+
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="prevCard()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-bold transition">← Previous</button>
+                <span id="flashcard-counter" class="text-slate-400 font-bold">1 / 10</span>
+                <button onclick="nextCard()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-bold transition">Next →</button>
+            </div>
+
+            <div class="flashcard-container w-full h-64 md:h-80 mx-auto max-w-2xl" onclick="flipCard()">
+                <div id="flashcard-inner" class="flashcard w-full h-full relative">
+                    <!-- Front -->
+                    <div class="flashcard-face absolute w-full h-full bg-slate-900 border-2 border-purple-500 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-lg">
+                        <span class="text-sm text-purple-400 font-bold mb-4 uppercase tracking-widest">Question</span>
+                        <h4 id="flashcard-q" class="text-3xl font-bold text-white">What is your full name?</h4>
+                        <span class="absolute bottom-4 text-slate-500 text-sm">Click to flip ⤵</span>
+                    </div>
+                    <!-- Back -->
+                    <div class="flashcard-face flashcard-back absolute w-full h-full bg-purple-900 border-2 border-purple-400 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-lg">
+                        <span class="text-sm text-purple-300 font-bold mb-4 uppercase tracking-widest">How to Answer</span>
+                        <p id="flashcard-a" class="text-xl text-white font-medium">"My full name is [First Name] [Last Name]."</p>
+                        <div id="flashcard-tip" class="mt-4 p-3 bg-purple-950 rounded-lg text-sm text-purple-200 w-full">Tip: Speak clearly and spell it if requested.</div>
+                        <span class="absolute bottom-4 text-purple-400 text-sm">Click to flip ⤴</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-slate-500 py-6 font-medium">
+            Keep practicing! Confidence is key in an interview. ✨
+        </footer>
+
+    </div>
+
+    <script>
+        // --- DATA EXTRACTED FROM PPTX ---
+        const allQuestions = [
+            "What is your full name?",
+            "Where were you born?",
+            "When did you start learning English?",
+            "Who is your favorite author?",
+            "What kind of music do you enjoy listening to?",
+            "How often do you exercise?",
+            "What is your favorite type of cuisine?",
+            "Where did you go on your last vacation?",
+            "How many languages do you speak?",
+            "When is your birthday?",
+            "What do you do in your free time?",
+            "Who is your best friend, and how did you meet?",
+            "What is your dream job?",
+            "Where do you see yourself in five years?",
+            "How do you usually celebrate special occasions?",
+            "What is your favorite movie or TV show?",
+            "Who is the most influential person in your life?",
+            "What skills would you like to develop further?",
+            "Where do you live, and what do you like about your neighborhood?",
+            "What is your educational background?"
+        ];
+
+        // --- 1. ROULETTE LOGIC ---
+        let lastQuestionIndex = -1;
+        function generateRandomQuestion() {
+            const display = document.getElementById('random-question-display');
+            let newIndex = lastQuestionIndex;
+            
+            // Prevent showing the same question twice in a row
+            while (newIndex === lastQuestionIndex) {
+                newIndex = Math.floor(Math.random() * allQuestions.length);
+            }
+            lastQuestionIndex = newIndex;
+
+            // Remove animation class to re-trigger it
+            display.classList.remove('fade-in');
+            void display.offsetWidth; // trigger reflow
+            
+            display.innerText = `"${allQuestions[newIndex]}"`;
+            display.classList.add('fade-in');
+        }
+
+        // --- 2. MATCHING GAME LOGIC ---
+        const matchingPairs = [
+            { id: 1, q: "Where were you born?", a: "I was born in Bogota, Colombia." },
+            { id: 2, q: "When is your birthday?", a: "It's on December 15th." },
+            { id: 3, q: "How often do you exercise?", a: "I go to the gym three times a week." },
+            { id: 4, q: "What do you do in your free time?", a: "I enjoy reading books and playing video games." },
+            { id: 5, q: "How many languages do you speak?", a: "I speak two: Spanish and English." }
+        ];
+
+        let selectedQ = null;
+        let selectedA = null;
+        let matchesFound = 0;
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function initMatchingGame() {
+            const qCol = document.getElementById('questions-col');
+            const aCol = document.getElementById('answers-col');
+            
+            // Keep questions in order, shuffle answers
+            let answers = matchingPairs.map(p => ({id: p.id, text: p.a}));
+            answers = shuffleArray(answers);
+
+            matchingPairs.forEach(pair => {
+                // Create Question Button
+                const btnQ = document.createElement('button');
+                btnQ.className = 'match-btn w-full text-left bg-slate-900 border-2 border-slate-600 rounded-xl p-4 font-semibold hover:bg-slate-800';
+                btnQ.innerText = pair.q;
+                btnQ.onclick = () => handleSelect('q', pair.id, btnQ);
+                qCol.appendChild(btnQ);
+            });
+
+            answers.forEach(ans => {
+                // Create Answer Button
+                const btnA = document.createElement('button');
+                btnA.className = 'match-btn w-full text-left bg-slate-900 border-2 border-slate-600 rounded-xl p-4 text-slate-300 hover:bg-slate-800';
+                btnA.innerText = ans.text;
+                btnA.onclick = () => handleSelect('a', ans.id, btnA);
+                aCol.appendChild(btnA);
+            });
+        }
+
+        function handleSelect(type, id, element) {
+            // Ignore if already matched
+            if (element.classList.contains('matched')) return;
+
+            // Handle Question Selection
+            if (type === 'q') {
+                if (selectedQ) selectedQ.el.classList.remove('selected');
+                selectedQ = { id, el: element };
+                element.classList.add('selected');
+            } 
+            // Handle Answer Selection
+            else if (type === 'a') {
+                if (selectedA) selectedA.el.classList.remove('selected');
+                selectedA = { id, el: element };
+                element.classList.add('selected');
+            }
+
+            // Check match if both are selected
+            if (selectedQ && selectedA) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            if (selectedQ.id === selectedA.id) {
+                // Correct match
+                selectedQ.el.classList.remove('selected');
+                selectedA.el.classList.remove('selected');
+                
+                selectedQ.el.classList.add('matched');
+                selectedA.el.classList.add('matched');
+                
+                matchesFound++;
+                selectedQ = null;
+                selectedA = null;
+
+                if (matchesFound === matchingPairs.length) {
+                    document.getElementById('matching-feedback').classList.remove('hidden');
+                }
+            } else {
+                // Wrong match
+                const tempQ = selectedQ.el;
+                const tempA = selectedA.el;
+                
+                tempQ.classList.add('wrong');
+                tempA.classList.add('wrong');
+                
+                setTimeout(() => {
+                    tempQ.classList.remove('wrong', 'selected');
+                    tempA.classList.remove('wrong', 'selected');
+                }, 400);
+
+                selectedQ = null;
+                selectedA = null;
+            }
+        }
+
+        // --- 3. FLASHCARD LOGIC ---
+        const flashcardData = [
+            { q: "What is your full name?", a: "My full name is [First Name] [Last Name].", tip: "Tip: Speak clearly. Sometimes they ask you to spell your last name." },
+            { q: "Where were you born?", a: "I was born in [City], [Country].", tip: "Tip: Use 'was born'. Example: I was born in Bogota." },
+            { q: "When did you start learning English?", a: "I started learning English [Time] ago / in [Year].", tip: "Tip: Use past tense 'started' (not start)." },
+            { q: "What kind of music do you enjoy listening to?", a: "I enjoy listening to [Genre], especially [Artist].", tip: "Tip: 'Enjoy' is followed by a verb with -ing (listening)." },
+            { q: "Where do you see yourself in five years?", a: "In five years, I see myself working as a [Job] and...", tip: "Tip: Show ambition! Mention career growth or learning new skills." },
+            { q: "What is your educational background?", a: "I studied [Major] at [University/School].", tip: "Tip: Mention your highest degree or current studies." },
+            { q: "What skills would you like to develop further?", a: "I would like to improve my [Skill] skills.", tip: "Tip: Be honest but choose a professional skill (e.g., programming, speaking)." },
+            { q: "What is your dream job?", a: "My dream job is to become a [Job Title] because...", tip: "Tip: Always add 'because' to show your motivation." }
+        ];
+
+        let currentCardIndex = 0;
+
+        function updateFlashcard() {
+            const data = flashcardData[currentCardIndex];
+            document.getElementById('flashcard-q').innerText = data.q;
+            document.getElementById('flashcard-a').innerText = data.a;
+            document.getElementById('flashcard-tip').innerText = data.tip;
+            document.getElementById('flashcard-counter').innerText = `${currentCardIndex + 1} / ${flashcardData.length}`;
+            
+            // Ensure card is face up when switching
+            document.getElementById('flashcard-inner').classList.remove('flipped');
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard-inner').classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (currentCardIndex < flashcardData.length - 1) {
+                currentCardIndex++;
+                updateFlashcard();
+            }
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                updateFlashcard();
+            }
+        }
+
+        // --- INITIALIZE PAGE ---
+        window.onload = () => {
+            initMatchingGame();
+            updateFlashcard();
+        };
+
+    </script>
+</body>
+</html>
